@@ -29,12 +29,16 @@ class data_munger(luigi.Task):
         regression_data = data.melt(id_vars = id_columns, var_name = "d", value_name = "demand")
         regression_data = pd.merge(regression_data, exogenous_data, how = 'left', on = 'd')
         regression_data = pd.merge(regression_data, sell_prices, how = 'left', on = ['store_id', 'item_id', 'wm_yr_wk'])
+        regression_data['d'] = regression_data['d'].str.replace('d_', '').astype(int)
         return regression_data
 
     def save_preprocessed_data(self, regression_data):
         regression_data.to_csv(os.path.join(cleaned_data_path, 'regression', 'regression.csv'), index = False)
-        regression_data.sample(frac = 0.1).to_csv(os.path.join(cleaned_data_path, 'regression', 'regression_sample_01.csv'), index=False)
-        regression_data.sample(frac = 0.01).to_csv(os.path.join(cleaned_data_path, 'regression', 'regression_sample_001.csv'), index=False)
+        max_day = regression_data['d'].max()
+        min_day = regression_data['d'].min()
+        delta = max_day - min_day
+        regression_data[regression_data['d'] >= ((delta * 0.9) + min_day)].to_csv(os.path.join(cleaned_data_path, 'regression', 'regression_sample_01.csv'), index=False)
+        regression_data[regression_data['d'] >= ((delta * 0.99) + min_day)].to_csv(os.path.join(cleaned_data_path, 'regression', 'regression_sample_001.csv'), index=False)
 
     def preprocess_data(self, data, exogenous_data, sell_prices):
         regression_data = self.generate_regression_data(data, exogenous_data, sell_prices)
