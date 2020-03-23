@@ -24,15 +24,17 @@ class exploratory_data_analysis(luigi.Task):
     def run(self):
         self.create_all_directories([os.path.join(checkpoint_path, 'eda')])
 
-        pd.DataFrame().to_csv(os.path.join(checkpoint_path, 'eda', 'success.csv'))
+        # pd.DataFrame().to_csv(os.path.join(checkpoint_path, 'eda', 'success.csv'))
 
     def requires(self):
         requirements_list = [fc.feature_creation(sample_size = self.sample_size, version = self.version)]
         return requirements_list
 
     def output(self):
-        return luigi.LocalTarget(os.path.join(checkpoint_path, 'eda', 'success.csv'))
+        return luigi.LocalTarget(os.path.join(checkpoint_path, 'eda',
+                                              'success_sample_rate_' + str(self.sample_size).replace('.','') +
+                                              '_version_' + str(self.version) + '.csv'))
 
 
 if __name__ == '__main__':
-    luigi.build([exploratory_data_analysis()], workers = 4, local_scheduler = True, log_level = 'CRITICAL')
+    luigi.build([exploratory_data_analysis(sample_size=0.01, version=1)], workers = 4, local_scheduler = True, log_level = 'INFO')
