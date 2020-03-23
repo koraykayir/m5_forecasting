@@ -2,6 +2,12 @@ import pandas as pd
 import numpy as np
 import os
 
+checkpoint_path = os.path.join('..', 'data', 'checkpoints')
+raw_data_path = os.path.join('..', 'data', 'raw')
+cleaned_data_path = os.path.join('..', 'data', 'cleaned_data')
+output_files_path = os.path.join('..', 'outputs', 'csv')
+output_images_path = os.path.join('..', 'outputs', 'img')
+
 def reduce_mem_usage(df):
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     start_mem = df.memory_usage().sum() / 1024 ** 2
