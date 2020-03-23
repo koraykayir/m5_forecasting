@@ -4,6 +4,7 @@ import pandas as pd
 import data_munger as dm
 import numpy as np
 import math
+import common as cm
 
 checkpoint_path = os.path.join('..', 'data', 'checkpoints')
 raw_data_path = os.path.join('..', 'data', 'raw')
@@ -14,6 +15,7 @@ output_images_path = os.path.join('..', 'outputs', 'img')
 class feature_creation(luigi.Task):
     sample_size = luigi.FloatParameter()
     version = luigi.IntParameter()
+
     def create_directories(self, directory):
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -27,7 +29,7 @@ class feature_creation(luigi.Task):
             data_path = os.path.join(cleaned_data_path, 'regression', 'regression.csv')
         else:
             data_path = os.path.join(cleaned_data_path, 'regression', 'regression_sample_' + str(self.sample_size).replace('.', '') + '.csv')
-        return pd.read_csv(data_path)
+        return cm.reduce_mem_usage(pd.read_csv(data_path))
 
     def create_features(self, df):
         df['wday_sin'] = np.sin(df['wday'] * 2 * math.pi / 7)
