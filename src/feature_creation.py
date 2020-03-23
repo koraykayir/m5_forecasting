@@ -54,4 +54,4 @@ class feature_creation(luigi.Task):
         return luigi.LocalTarget(os.path.join(checkpoint_path, 'feature_creation', 'success_sample_rate_' + str(self.sample_size).replace('.', '') + '_version_' + str(self.version) + '.csv'))
 
 if __name__ == '__main__':
-    luigi.build([feature_creation(sample_size = 1, version = 1)], workers = 4, local_scheduler = True, log_level = 'CRITICAL')
+    luigi.build([feature_creation(sample_size = 0.01, version = 1)], workers = 4, local_scheduler = True, log_level = 'CRITICAL')
