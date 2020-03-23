@@ -34,7 +34,7 @@ class feature_creation(luigi.Task):
         cm.create_all_directories([os.path.join(checkpoint_path, 'feature_creation')])
         df = self.read_data()
         df = self.create_features(df)
-        cm.save_data(os.path.join(cleaned_data_path, 'regression', 'features_extractor_sample_rate_' + str(self.sample_size).replace('.', '') + '_version_' + str(self.version) + '.csv'))
+        cm.save_data(df, os.path.join(cleaned_data_path, 'regression', 'features_extractor_sample_rate_' + str(self.sample_size).replace('.', '') + '_version_' + str(self.version) + '.csv'))
         pd.DataFrame().to_csv(os.path.join(checkpoint_path, 'feature_creation', 'success_sample_rate_' + str(self.sample_size).replace('.', '') + '_version_' + str(self.version) + '.csv'))
 
     def requires(self):
