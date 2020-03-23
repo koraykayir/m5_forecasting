@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import LabelEncoder
 import os
 
 checkpoint_path = os.path.join('..', 'data', 'checkpoints')
@@ -11,7 +12,13 @@ output_images_path = os.path.join('..', 'outputs', 'img')
 training_mask = ['id', 'item_id', 'dept_id', 'cat_id', 'store_id', 'state_id', 'd', 'date', 'wm_yr_wk', 'weekday',
                  'wday', 'month', 'year', 'event_name_1', 'event_type_1', 'event_name_2', 'event_type_2', 'snap_CA',
                  'snap_TX', 'snap_WI', 'sell_price', 'wday_sin', 'wday_cos', 'month_sin', 'month_cos']
+
+categorical_features = ['id', 'item_id', 'dept_id', 'cat_id', 'store_id', 'state_id', 'date', 'weekday', 'event_name_1',
+                        'event_type_1', 'event_name_2', 'event_type_2']
+
 label = 'demand'
+
+test_percentage = 0.2
 
 def reduce_mem_usage(df):
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
@@ -56,4 +63,13 @@ def read_data(path):
 def save_data(df, path):
     df.to_csv(path, index = False)
 
+def encode_categorical(df, cols):
+    for col in cols:
+        le = LabelEncoder()
+        not_null = df[col][df[col].notnull()]
+        df[col] = pd.Series(le.fit_transform(not_null), index=not_null.index)
 
+    return df
+
+def evaluate_model(y_pred, val, val_label, train, train_label):
+    print('Do Nothing!') # TODO Define Error Metric
