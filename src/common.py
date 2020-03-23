@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 
 def reduce_mem_usage(df):
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
@@ -29,3 +30,19 @@ def reduce_mem_usage(df):
     print('Mem. usage decreased to {:5.2f} Mb ({:.1f}% reduction)'.format(end_mem,
                                                                           100 * (start_mem - end_mem) / start_mem))
     return df
+
+def create_directories(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+def create_all_directories(directory_list):
+    for directory in directory_list:
+        create_directories(directory)
+
+def read_data(path):
+    return reduce_mem_usage(pd.read_csv(path))
+
+def save_data(df, path):
+    df.to_csv(path, index = False)
+
+

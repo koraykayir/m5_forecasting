@@ -1,6 +1,7 @@
 import luigi
 import os
 import pandas as pd
+import common as cm
 
 checkpoint_path = os.path.join('..', 'data', 'checkpoints')
 raw_data_path = os.path.join('..', 'data', 'raw')
@@ -9,19 +10,11 @@ output_files_path = os.path.join('..', 'outputs', 'csv')
 output_images_path = os.path.join('..', 'outputs', 'img')
 
 class data_munger(luigi.Task):
-    def create_directories(self, directory):
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-    def create_all_directories(self, directory_list):
-        for directory in directory_list:
-            self.create_directories(directory)
-
     def read_raw_data(self):
-        calendar = pd.read_csv(os.path.join(raw_data_path, 'calendar.csv'))
-        sales_train = pd.read_csv(os.path.join(raw_data_path, 'sales_train_validation.csv'))
-        sell_prices = pd.read_csv(os.path.join(raw_data_path, 'sell_prices.csv'))
-        sample_submission = pd.read_csv(os.path.join(raw_data_path, 'sample_submission.csv'))
+        calendar = cm.read_data(os.path.join(raw_data_path, 'calendar.csv'))
+        sales_train = cm.read_data(os.path.join(raw_data_path, 'sales_train_validation.csv'))
+        sell_prices = cm.read_data(os.path.join(raw_data_path, 'sell_prices.csv'))
+        sample_submission = cm.read_data(os.path.join(raw_data_path, 'sample_submission.csv'))
         return sample_submission, calendar, sales_train, sell_prices
 
     def generate_regression_data(self, data, exogenous_data, sell_prices):
@@ -46,7 +39,7 @@ class data_munger(luigi.Task):
         print('Pre-processing has been done.')
 
     def run(self):
-        self.create_all_directories([checkpoint_path,
+        cm.create_all_directories([checkpoint_path,
                                      raw_data_path,
                                      output_files_path,
                                      output_images_path,
