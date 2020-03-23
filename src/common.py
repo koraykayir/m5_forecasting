@@ -8,6 +8,11 @@ cleaned_data_path = os.path.join('..', 'data', 'cleaned_data')
 output_files_path = os.path.join('..', 'outputs', 'csv')
 output_images_path = os.path.join('..', 'outputs', 'img')
 
+training_mask = ['id', 'item_id', 'dept_id', 'cat_id', 'store_id', 'state_id', 'd', 'date', 'wm_yr_wk', 'weekday',
+                 'wday', 'month', 'year', 'event_name_1', 'event_type_1', 'event_name_2', 'event_type_2', 'snap_CA',
+                 'snap_TX', 'snap_WI', 'sell_price', 'wday_sin', 'wday_cos', 'month_sin', 'month_cos']
+label = 'demand'
+
 def reduce_mem_usage(df):
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     start_mem = df.memory_usage().sum() / 1024 ** 2
