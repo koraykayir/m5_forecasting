@@ -6,41 +6,56 @@ import common as cm
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-checkpoint_path = os.path.join('..', 'data', 'checkpoints')
-raw_data_path = os.path.join('..', 'data', 'raw')
-cleaned_data_path = os.path.join('..', 'data', 'cleaned_data')
-output_files_path = os.path.join('..', 'outputs', 'csv')
-output_images_path = os.path.join('..', 'outputs', 'img')
-
 class exploratory_data_analysis(luigi.Task):
     sample_size = luigi.FloatParameter()
     version = luigi.IntParameter()
     df = None
 
-    def create_directories(self, directory):
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+    def target_analysis(self, df):
+        plt.figure(figsize=(24, 10))
+        sns.distplot(df['demand'], bins=100)
+        plt.savefig(os.path.join(cm.output_images_path, 'target_analysis'))
 
-    def create_all_directories(self, directory_list):
-        for directory in directory_list:
-            self.create_directories(directory)
+    def calculate_weights(self, df):
+        days_to_consider = 28
+        last_day = max(df['d'])
+
+        demand_recent = df[df['d'] > last_day - days_to_consider].groupby('id')['demand'].agg('sum').reset_index()
+        sell_price_recent = df[df['d'] > last_day - days_to_consider].groupby('id')['sell_price'].mean().reset_index()
+        demand_recent['weight'] = demand_recent['demand'] * sell_price_recent['sell_price']
+
+        plt.figure(figsize=(24, 10))
+        sns.distplot(demand_recent['weight'], bins=100)
+        plt.savefig(os.path.join(cm.output_images_path, 'weights'))
+
+        plt.figure(figsize=(24, 10))
+        kwargs = {'cumulative': True}
+        sns.distplot(demand_recent['weight'], bins=100, hist_kws=kwargs)
+        plt.savefig(os.path.join(cm.output_images_path, 'weights_cumulative'))
+
+        demand_recent.to_csv(os.path.join(cm.output_files_path, 'weights.csv'))
 
     def run(self):
-        self.create_all_directories([os.path.join(checkpoint_path, 'eda')])
+        cm.create_all_directories([os.path.join(cm.checkpoint_path, 'eda')])
 
         self.df = cm.read_data(os.path.join(cm.cleaned_data_path, 'regression', 'features_extractor'
                                     +'_sample_rate_' + str(self.sample_size).replace('.', '')
                                     + '_version_' + str(self.version)
                                     +'.csv'))
 
-        # pd.DataFrame().to_csv(os.path.join(checkpoint_path, 'eda', 'success.csv'))
+        self.target_analysis(self.df)
+        self.calculate_weights(self.df)
+
+        # pd.DataFrame().to_csv(os.path.join(cm.checkpoint_path, 'eda',
+        #                                               'success_sample_rate_' + str(self.sample_size).replace('.','') +
+        #                                               '_version_' + str(self.version) + '.csv'))
 
     def requires(self):
         requirements_list = [fc.feature_creation(sample_size = self.sample_size, version = self.version)]
         return requirements_list
 
     def output(self):
-        return luigi.LocalTarget(os.path.join(checkpoint_path, 'eda',
+        return luigi.LocalTarget(os.path.join(cm.checkpoint_path, 'eda',
                                               'success_sample_rate_' + str(self.sample_size).replace('.','') +
                                               '_version_' + str(self.version) + '.csv'))
 
